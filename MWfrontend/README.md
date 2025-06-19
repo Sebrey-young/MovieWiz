@@ -1,0 +1,1 @@
+To Run this whole project localy you have to start docker container, Spring-boot app (backend), run ".\venv\Scripts\Activate.ps1" and then "uvicorn scraper.ml_service:app --reload --port 8001" in the /scraper directory, then you can run npm run dev in the front end directory.

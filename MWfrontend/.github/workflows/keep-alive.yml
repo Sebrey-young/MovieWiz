@@ -1,0 +1,43 @@
+name: Keep Render Services Alive
+
+on:
+  schedule:
+    # Run every 10 minutes to prevent 15-minute sleep
+    - cron: '0,15,30,45 * * * *'
+  
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20  # Give plenty of time for cold starts
+    
+    steps:
+      - name: Wake Backend Service
+        run: |
+          echo "Waking backend service..."
+          curl --max-time 600 \
+               --retry 3 \
+               --retry-delay 30 \
+               --retry-max-time 600 \
+               --connect-timeout 60 \
+               https://mwbackend-ydam.onrender.com || echo "Backend wake attempt completed"
+      
+      - name: Wake ML Service  
+        run: |
+          echo "Waking ML service..."
+          curl --max-time 600 \
+               --retry 3 \
+               --retry-delay 30 \
+               --retry-max-time 600 \
+               --connect-timeout 60 \
+               https://mwscraper.onrender.com || echo "ML service wake attempt completed"
+      
+      - name: Verify Services
+        run: |
+          echo "Checking if services are responsive..."
+          sleep 30 
+          
+          curl --max-time 30 https://mwbackend-ydam.onrender.com || echo "Backend not responding"
+          curl --max-time 30 https://mwscraper.onrender.com || echo "ML service not responding"
